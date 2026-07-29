@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://file-tunnel.dev/schema/sync/v1/upload-job.schema.json",
+  "title": "Replication-safe File Tunnel upload job",
+  "type": "object",
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tunnel_id": {"type": "string", "format": "uuid"},
+    "file_id": {"type": ["string", "null"], "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "media_type": {"type": "string", "minLength": 1, "maxLength": 128},
+    "size_bytes": {"type": "integer", "minimum": 0, "maximum": 5368709120},
+    "bytes_transferred": {"type": "integer", "minimum": 0},
+    "status": {
+      "type": "string",
+      "enum": ["queued", "declaring", "uploading", "paused", "available", "imported", "failed", "cancelled"]
+    },
+    "attempt": {"type": "integer", "minimum": 0, "maximum": 100},
+    "reason_code": {"type": ["string", "null"], "maxLength": 64},
+    "updatedAt": {"type": "string", "pattern": "^[0-9]+-[0-9]+-[A-Za-z0-9._:-]+$"},
+    "syncedAt": {"type": ["string", "null"]}
+  },
+  "required": [
+    "id",
+    "tunnel_id",
+    "file_id",
+    "name",
+    "media_type",
+    "size_bytes",
+    "bytes_transferred",
+    "status",
+    "attempt",
+    "reason_code",
+    "updatedAt",
+    "syncedAt"
+  ],
+  "additionalProperties": false
+}

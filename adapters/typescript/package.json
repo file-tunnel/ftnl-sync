@@ -1,0 +1,29 @@
+{
+  "name": "@file-tunnel/sync",
+  "version": "0.1.0",
+  "description": "File Tunnel upload-job adapter for opto-sync",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "peerDependencies": {
+    "@opto-sync/client": ">=0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@opto-sync/client": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  },
+  "license": "MIT"
+}
