@@ -5,3 +5,5 @@ target/
 .dart_tool/
 build/
 pubspec.lock
+.cache/
+.direnv/

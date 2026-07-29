@@ -58,9 +58,11 @@ replication-safe record.
 ## Validate
 
 ```bash
-(cd adapters/typescript && npm install && npm test)
-(cd adapters/rust && cargo test)
-node --test tests/*.test.mjs
+nix develop --command agent-check
 ```
+
+Clone with `--recurse-submodules` before entering the shell. The root Nix lock
+pins Rust, Node.js, SQLite, and the repository automation tools; the
+`opto-sync-clients` source remains an independently reviewed gitlink.
 
 MIT licensed.
