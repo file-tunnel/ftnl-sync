@@ -8,6 +8,7 @@ pkgs.mkShell {
     cargo
     clippy
     git
+    jdk21_headless
     jq
     nixfmt
     nodejs_22

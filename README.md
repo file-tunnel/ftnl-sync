@@ -61,6 +61,10 @@ replication-safe record.
 nix develop --command agent-check
 ```
 
+The parent repository also runs the complete formal model pinned in the
+`opto-sync-clients` submodule, plus Proptest and Kani checks for File Tunnel
+upload persistence. See [`docs/formal-methods.md`](docs/formal-methods.md).
+
 Clone with `--recurse-submodules` before entering the shell. The root Nix lock
 pins Rust, Node.js, SQLite, and the repository automation tools; the
 `opto-sync-clients` source remains an independently reviewed gitlink.

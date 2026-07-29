@@ -59,9 +59,14 @@ pub enum Error {
     Queue,
 }
 
+#[must_use]
+pub const fn progress_is_valid(size_bytes: u64, bytes_transferred: u64) -> bool {
+    bytes_transferred <= size_bytes
+}
+
 impl UploadJob {
     pub fn validate(&self) -> Result<(), Error> {
-        if self.bytes_transferred > self.size_bytes {
+        if !progress_is_valid(self.size_bytes, self.bytes_transferred) {
             return Err(Error::InvalidProgress);
         }
         if self.name.is_empty() || self.media_type.is_empty() {
@@ -126,5 +131,34 @@ mod tests {
         let mut invalid = job();
         invalid.bytes_transferred = 101;
         assert_eq!(invalid.validate(), Err(Error::InvalidProgress));
+    }
+
+    proptest::proptest! {
+        #[test]
+        fn progress_validation_matches_the_declared_bound(
+            size_bytes in proptest::prelude::any::<u64>(),
+            bytes_transferred in proptest::prelude::any::<u64>(),
+        ) {
+            let mut candidate = job();
+            candidate.size_bytes = size_bytes;
+            candidate.bytes_transferred = bytes_transferred;
+            let valid = candidate.validate().is_ok();
+            proptest::prop_assert_eq!(valid, bytes_transferred <= size_bytes);
+        }
+    }
+}
+
+#[cfg(kani)]
+mod verification {
+    use super::progress_is_valid;
+
+    #[kani::proof]
+    fn persisted_progress_never_exceeds_declared_size() {
+        let size_bytes = kani::any::<u64>();
+        let bytes_transferred = kani::any::<u64>();
+        assert_eq!(
+            progress_is_valid(size_bytes, bytes_transferred),
+            bytes_transferred <= size_bytes
+        );
     }
 }
