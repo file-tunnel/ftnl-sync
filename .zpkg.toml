@@ -1,0 +1,26 @@
+[package]
+org = "file-tunnel"
+name = "ftnl-sync"
+version = "0.1.0"
+description = "Local-first File Tunnel upload intent, checkpoints, schemas, formal models, and Opto Sync integration"
+license = "MIT"
+keywords = ["sync", "uploads", "offline-first", "formal-methods", "source-package"]
+
+[package.repository]
+vcs = "git"
+url = "https://github.com/file-tunnel/ftnl-sync"
+
+[dependencies]
+"opto-sync/opto-sync-clients" = "^0.2.0"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+smoke_test = "test -f \"$ZED_PKG_TEST_TARGET/.gitmodules\" && test -f \"$ZED_PKG_TEST_TARGET/schema/upload-job.schema.json\" && test -f \"$ZED_PKG_TEST_TARGET/docs/integration.md\""
+exclude = [".env", ".env.*", ".direnv/**", ".zed/**", ".zed-pack/**", "tmp/**", "**/*.log", ".DS_Store", "**/target/**", "**/node_modules/**", "**/.dart_tool/**", "**/build/**"]
+
+[install]
+adapter = "none"
+
+[scripts]
+test = "nix develop --command agent-check"
