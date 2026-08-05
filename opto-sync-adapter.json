@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opto-sync.dev/schemas/downstream-adapter-v1.json",
+  "schemaVersion": 1,
+  "repository": "file-tunnel/ftnl-sync",
+  "e2eRepository": "file-tunnel/ftnl-e2e",
+  "rolloutIssue": "DEN-1388",
+  "releaseGate": "DEN-309",
+  "releaseState": "blocked-until-certified-package-published",
+  "dependency": {"package": "opto-sync/opto-sync-clients", "range": "^0.2.0", "installRoot": "zed_modules/opto-sync/opto-sync-clients"},
+  "legacySourcePins": {
+    "opto-sync-clients": "opto-sync-clients",
+    "removalPolicy": "remove only after source-pin, formal-replay, persistence, and immutable Zed artifact parity"
+  },
+  "nativeAdapters": {
+    "rust": {"package": "opto-sync-client", "path": "zed_modules/opto-sync/opto-sync-clients/clients/rust"},
+    "typescript": {"package": "@opto-sync/client", "path": "zed_modules/opto-sync/opto-sync-clients/clients/ts"},
+    "dart": {"package": "opto_sync_client", "path": "zed_modules/opto-sync/opto-sync-clients/clients/dart"}
+  },
+  "persistence": {"web": ["indexeddb"], "mobile": ["sqlite"], "backend": ["postgres", "supabase"], "blobPlane": ["external-object-storage"]},
+  "productCollections": ["upload_jobs", "byte_checkpoints", "transfer_manifests", "retry_state"],
+  "wrapperRetains": [
+    "File Tunnel upload/checkpoint/manifest envelopes and generated interface mapping",
+    "session authorization, endpoint configuration, range validation, and retry policy",
+    "byte-offset monotonicity, resumable-transfer idempotency, and integrity metadata",
+    "separation of replicated transfer metadata from external blob bytes",
+    "File Tunnel telemetry, formal replay adapters, migrations, and public facade"
+  ],
+  "delegatesToOptoSync": [
+    "deterministic metadata reconciliation",
+    "hybrid logical clock and mutation identity",
+    "durable queue lifecycle and local-view rebase",
+    "IndexedDB and SQLite storage primitives",
+    "checkpointed push/pull protocol loop",
+    "background and realtime wake adapters"
+  ],
+  "invariants": {"renderLocalView": true, "realtimeIsWakeHint": true, "serverCursorIsAuthoritative": true, "mutableGitRefsForbidden": true, "removeBespokeCoreOnlyAfterParity": true}
+}
