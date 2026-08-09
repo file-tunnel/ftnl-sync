@@ -153,8 +153,10 @@ version = "0.1.0"
 dependencies = [
  "opto-sync-client",
  "proptest",
+ "rusqlite",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror",
  "uuid",
 ]
