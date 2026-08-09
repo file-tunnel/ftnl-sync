@@ -23,9 +23,10 @@ The synced record contains only:
 - attempt count and redacted reason code;
 - hybrid logical timestamps for deterministic merge.
 
-The local SQLite/IndexedDB row additionally stores an opaque `local_ref` that a
-platform adapter can resolve to a file handle. Capabilities stay in OS secure
-storage or an in-memory browser session keyed by tunnel ID.
+Platform storage may keep an opaque `local_ref` in a separate, device-local
+table that never enters the protocol queue. The Rust `DurableUploadQueue`
+deliberately does not accept one. Capabilities stay in OS secure storage or an
+in-memory browser session keyed by tunnel ID.
 
 ## Dependency model
 
@@ -68,5 +69,18 @@ upload persistence. See [`docs/formal-methods.md`](docs/formal-methods.md).
 Clone with `--recurse-submodules` before entering the shell. The root Nix lock
 pins Rust, Node.js, SQLite, and the repository automation tools; the
 `opto-sync-clients` source remains an independently reviewed gitlink.
+
+## Native Rust durability
+
+Enable the adapter's `opto` feature and open `DurableUploadQueue` with a stable,
+dash-free writer ID. `queue` replaces caller timestamps with a persisted hybrid
+logical timestamp, then commits the optimistic `ftnl_upload_jobs` record and
+protocol-v1 mutation atomically through Opto-Sync's `SqliteProtocolStore`.
+Reopening the database preserves mutation IDs, pending work, local metadata,
+and timestamp monotonicity.
+
+The queue contains metadata only. The CLI or desktop host keeps the source path
+and capability outside this database, performs the actual byte transfer through
+`ftnl-clients`, and queues redacted lifecycle/checkpoint changes here.
 
 MIT licensed.

@@ -13,7 +13,7 @@ const job = {
   status: "queued",
   attempt: 0,
   reason_code: null,
-  updatedAt: "1722276000000-0-device",
+  updatedAt: "1722276000000-0000-device",
   syncedAt: null,
 };
 

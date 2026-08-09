@@ -13,7 +13,6 @@ npm test
 (
   cd adapters/rust
   cargo fmt --check
-  cargo clippy --locked --all-targets -- -D warnings
-  cargo test --locked --all-targets
-  cargo check --locked --features opto
+  cargo clippy --locked --all-targets --all-features -- -D warnings
+  cargo test --locked --all-targets --all-features
 )

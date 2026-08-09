@@ -51,6 +51,7 @@ const allowedReasons = new Set([
   "file_rejected",
   "upload_interrupted",
 ]);
+const canonicalHlc = /^[0-9]{13}-[0-9a-fA-F]{4}-[A-Za-z0-9._:]+$/;
 
 export class FileTunnelSync {
   constructor(
@@ -77,7 +78,7 @@ export class FileTunnelSync {
   private async queue(job: UploadJob): Promise<void> {
     // JSON serialization is the security boundary. UploadJob has no localRef,
     // content, bearer token, or provider URL field.
-    await this.opto.queueMutation("ftnl_upload_job", job.id, JSON.stringify(job));
+    await this.opto.queueMutation("ftnl_upload_jobs", job.id, JSON.stringify(job));
   }
 }
 
@@ -85,8 +86,11 @@ function validate(job: UploadJob): void {
   if (!job.id || !job.tunnel_id || !job.name || !job.media_type) {
     throw new TypeError("upload job identity and display metadata are required");
   }
-  if (!Number.isSafeInteger(job.size_bytes) || job.size_bytes < 0) {
-    throw new RangeError("size_bytes must be a non-negative safe integer");
+  if (job.name.length > 255 || job.media_type.length > 128) {
+    throw new RangeError("upload job display metadata exceeds the replication contract");
+  }
+  if (!Number.isSafeInteger(job.size_bytes) || job.size_bytes < 0 || job.size_bytes > 5_368_709_120) {
+    throw new RangeError("size_bytes must be within the replication contract");
   }
   if (
     !Number.isSafeInteger(job.bytes_transferred) ||
@@ -97,5 +101,11 @@ function validate(job: UploadJob): void {
   }
   if (job.reason_code && !allowedReasons.has(job.reason_code)) {
     throw new TypeError("reason_code must be redacted and allowlisted");
+  }
+  if (!Number.isSafeInteger(job.attempt) || job.attempt < 0 || job.attempt > 100) {
+    throw new RangeError("attempt must be an integer from 0 through 100");
+  }
+  if (!canonicalHlc.test(job.updatedAt)) {
+    throw new TypeError("updatedAt must be a canonical opto-sync HLC timestamp");
   }
 }
