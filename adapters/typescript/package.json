@@ -9,10 +9,15 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test test/*.test.mjs"
+    "test": "npm run build && node --test test/*.test.mjs",
+    "lint:ores": "if [ -f ../../.ores-lint/lint.sh ]; then sh ../../.ores-lint/lint.sh; else echo 'ores-lint not installed'; fi",
+    "prepublishOnly": "npm run lint:ores",
+    "prebuild": "npm run lint:ores"
   },
   "peerDependencies": {
     "@opto-sync/client": ">=0.2.0"
@@ -25,5 +30,13 @@
   "devDependencies": {
     "typescript": "^7.0.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "oresLint": {
+    "note": "Declared, not installed. ores-lint resolves these from a global install - see .ores-lint/README.md",
+    "requires": {
+      "eslint": ">=9",
+      "typescript-eslint": ">=8 (optional; without it .ts files are skipped)"
+    },
+    "install": "npm i -g eslint typescript-eslint"
+  }
 }
