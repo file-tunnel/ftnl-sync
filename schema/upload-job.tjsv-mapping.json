@@ -1,0 +1,15 @@
+{
+  "schema": "ores.typespec-json-schema-validator.mapping/v1",
+  "declarations": [
+    {
+      "typespec": "FileTunnel.Sync.UploadJob",
+      "generated": "UploadJob",
+      "authored": "Replication-safe File Tunnel upload job"
+    }
+  ],
+  "ignore": {
+    "typespec": [],
+    "generated": [],
+    "authored": []
+  }
+}
