@@ -62,7 +62,7 @@ jobs:
 
       # Both TJSV references below use the same reviewed immutable validator commit.
       - name: Generate Schema B and compare both peer authorities
-        uses: ORESoftware/typespec-json-schema-validator@1a24dd41ee8937ce6f3c20d055104d00d925b7c9
+        uses: ORESoftware/typespec-json-schema-validator@5fdbeaf57d582b69126c6e1a0623b43bc2a25d04
         with:
           typespec: schema/upload-job.tsp
           schema: schema/upload-job.schema.json
