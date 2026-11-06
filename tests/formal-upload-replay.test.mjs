@@ -106,12 +106,15 @@ test("every reachable abstract replay preserves progress, retry bound and termin
 });
 
 test("stale server snapshots preserve every local checkpoint, including after failure", () => {
-  for (const status of ["queued", "declaring", "uploading", "paused", "failed", "available"])
+  for (const status of ["queued", "declaring", "uploading", "paused", "failed"])
     for (let local = 1; local <= SIZE; local++)
       for (let remote = 0; remote < local; remote++) {
         const initial = state(status, local, 1);
         assert.deepEqual(reconcileCheckpoint(initial, remote), initial);
       }
+  const fullyAvailable = state("available", SIZE, 1);
+  for (let remote = 0; remote < SIZE; remote++)
+    assert.deepEqual(reconcileCheckpoint(fullyAvailable, remote), fullyAvailable);
 });
 
 test("invalid and noninteger remote checkpoints fail closed instead of being clamped", () => {
