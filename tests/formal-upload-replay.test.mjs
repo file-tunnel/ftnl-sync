@@ -139,5 +139,4 @@ test("terminal states reject all updates and retries, not just normal transition
   const cancelledWithIncompleteBytes = state("cancelled", 1, 0);
   assert.deepEqual(reconcileCheckpoint(cancelledWithIncompleteBytes, SIZE),
                    cancelledWithIncompleteBytes);
-  }
 });
