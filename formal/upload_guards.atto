@@ -1,0 +1,24 @@
+// AttoLang source-level policy reference; NOT compiler/runtime evidence.
+// Real adapters must compare observations against the bounded replay contract.
+define module upload_guards as
+  pub fnc accept_checkpoint(int previous_bytes, int next_bytes,
+                            int total_bytes, bool cancelled): bool {
+    return !cancelled && previous_bytes >= 0 &&
+      next_bytes >= previous_bytes && next_bytes <= total_bytes;
+  }
+
+  pub fnc replicate_metadata(bool contains_file_bytes,
+                             bool contains_local_ref,
+                             bool contains_capability): bool {
+    return !contains_file_bytes && !contains_local_ref && !contains_capability;
+  }
+
+  pub fnc self_check(): bool {
+    return accept_checkpoint(1,2,3,false) &&
+      !accept_checkpoint(2,1,3,false) &&
+      !accept_checkpoint(1,4,3,false) &&
+      !accept_checkpoint(1,2,3,true) &&
+      replicate_metadata(false,false,false) &&
+      !replicate_metadata(false,true,false);
+  }
+end
