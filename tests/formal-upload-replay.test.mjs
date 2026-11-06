@@ -16,7 +16,8 @@ function state(status = "queued", checkpoint = 0, attempt = 0) {
 function assertState(s) {
   if (!statuses.has(s.status) ||
       !Number.isSafeInteger(s.checkpoint) || s.checkpoint < 0 || s.checkpoint > SIZE ||
-      !Number.isSafeInteger(s.attempt) || s.attempt < 0 || s.attempt > MAX_ATTEMPT)
+      !Number.isSafeInteger(s.attempt) || s.attempt < 0 || s.attempt > MAX_ATTEMPT ||
+      (["available", "imported"].includes(s.status) && s.checkpoint !== SIZE))
     throw new RangeError("invalid bounded upload state");
 }
 function reconcileCheckpoint(s, remote) {
@@ -122,6 +123,7 @@ test("malformed local state and over-budget retries are rejected", () => {
     state("unexpected", 0, 0), state("queued", -1, 0),
     state("queued", SIZE + 1, 0), state("queued", 0, MAX_ATTEMPT + 1),
     state("queued", 0.25, 0), state("queued", 0, -1),
+    state("available", SIZE - 1, 0), state("imported", 0, 0),
   ]) assert.throws(() => successors(invalid), RangeError);
 });
 
