@@ -24,6 +24,7 @@ function reconcileCheckpoint(s, remote) {
   assertState(s);
   if (!Number.isSafeInteger(remote) || remote < 0 || remote > SIZE)
     throw new RangeError("invalid remote checkpoint");
+  if (terminal.has(s.status)) return s; // even a late snapshot cannot revive a terminal job
   return state(s.status, Math.max(s.checkpoint, remote), s.attempt);
 }
 function successors(s) {
@@ -131,7 +132,12 @@ test("terminal states reject all updates and retries, not just normal transition
   for (const status of terminal) {
     const terminalState = state(status, SIZE, MAX_ATTEMPT);
     assert.deepEqual(successors(terminalState), []);
-    // A terminal job cannot be resurrected by a stale remote snapshot.
+    // A terminal job cannot be resurrected by an incoming server checkpoint.
+    assert.deepEqual(reconcileCheckpoint(terminalState, 0), terminalState);
     assert.deepEqual(successors(terminalState), []);
+  }
+  const cancelledWithIncompleteBytes = state("cancelled", 1, 0);
+  assert.deepEqual(reconcileCheckpoint(cancelledWithIncompleteBytes, SIZE),
+                   cancelledWithIncompleteBytes);
   }
 });
