@@ -292,7 +292,9 @@ fn valid_hlc(timestamp: &str) -> bool {
     millis.len() == 13
         && millis.bytes().all(|byte| byte.is_ascii_digit())
         && counter.len() == 4
-        && counter.bytes().all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+        && counter
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
         && valid_writer_id(node_id)
 }
 
