@@ -79,7 +79,7 @@ pub enum Error {
     #[error("durable upload state is invalid")]
     Deserialize,
     #[cfg(feature = "opto")]
-    #[error("the durable writer id must be non-empty and contain no '-'")]
+    #[error("the durable writer id must be 1..128 ASCII letters, digits, dots or underscores")]
     InvalidWriterId,
 }
 
@@ -264,7 +264,7 @@ impl DurableUploadQueue {
 
 #[cfg(feature = "opto")]
 fn validate_writer_id(writer_id: String) -> Result<String, Error> {
-    if writer_id.is_empty() || writer_id.contains('-') {
+    if !valid_writer_id(&writer_id) {
         return Err(Error::InvalidWriterId);
     }
     Ok(writer_id)
@@ -273,6 +273,13 @@ fn validate_writer_id(writer_id: String) -> Result<String, Error> {
 #[cfg(feature = "opto")]
 fn durable(error: SqliteStoreError) -> Error {
     Error::Durable(error.to_string())
+}
+
+fn valid_writer_id(value: &str) -> bool {
+    (1..=128).contains(&value.len())
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_'))
 }
 
 fn valid_hlc(timestamp: &str) -> bool {
@@ -285,9 +292,10 @@ fn valid_hlc(timestamp: &str) -> bool {
     millis.len() == 13
         && millis.bytes().all(|byte| byte.is_ascii_digit())
         && counter.len() == 4
-        && counter.bytes().all(|byte| byte.is_ascii_hexdigit())
-        && !node_id.is_empty()
-        && !node_id.contains('-')
+        && counter
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
+        && valid_writer_id(node_id)
 }
 
 #[cfg(test)]
@@ -324,6 +332,33 @@ mod tests {
         ] {
             assert!(!json.contains(forbidden));
         }
+    }
+
+    #[test]
+    fn rejects_noncanonical_hlc_ids_and_counters_before_replication() {
+        for invalid in [
+            "1722276000000-0000-evil\\nname",
+            "1722276000000-0000-../escape",
+            "1722276000000-0000-name with spaces",
+            "1722276000000-000A-device",
+            "1722276000000-0000-",
+        ] {
+            let mut candidate = job();
+            candidate.updated_at = invalid.to_owned();
+            assert_eq!(candidate.validate(), Err(Error::InvalidTimestamp));
+        }
+
+        let mut oversized = job();
+        oversized.updated_at = format!("1722276000000-0000-{}", "a".repeat(129));
+        assert_eq!(oversized.validate(), Err(Error::InvalidTimestamp));
+    }
+
+    #[test]
+    fn writer_id_validation_blocks_controls_and_traversal() {
+        for invalid in ["", "foo-bar", "../escape", "a\\nb", "a b"] {
+            assert!(!valid_writer_id(invalid));
+        }
+        assert!(valid_writer_id("device01.cli01"));
     }
 
     #[test]
