@@ -16,6 +16,10 @@ on:
       - "schema/upload-job.tsp"
       - "schema/upload-job.schema.json"
       - "schema/upload-job.tjsv-mapping.json"
+      - "src/**"
+      - "tests/**"
+      - "adapters/typescript/**"
+      - "adapters/rust/**"
       - ".github/workflows/typespec-json-schema-peer-authority.yml"
   push:
     branches: [main, dev]
@@ -23,6 +27,10 @@ on:
       - "schema/upload-job.tsp"
       - "schema/upload-job.schema.json"
       - "schema/upload-job.tjsv-mapping.json"
+      - "src/**"
+      - "tests/**"
+      - "adapters/typescript/**"
+      - "adapters/rust/**"
       - ".github/workflows/typespec-json-schema-peer-authority.yml"
   schedule:
     - cron: "37 5 * * 1"
@@ -81,6 +89,14 @@ jobs:
           schema: schema/upload-job.schema.json
           generated_schema: .typespec-json-schema-validator/generated/typespec.generated.schema.json
           expected_declarations: '["FileTunnel.Sync.UploadJob"]'
+
+      # Execute the real replicated-envelope security suite on the same
+      # exact head that passed the independent TypeSpec/JSON Schema comparison.
+      - name: Prove native JavaScript sync safety and negative wire cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
 
       - name: Verify authored authorities were not modified
         if: ${{ always() }}
